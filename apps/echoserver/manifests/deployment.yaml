@@ -14,6 +14,8 @@ spec:
       labels:
         app: echoserver
     spec:
+      nodeSelector:
+        app: echoserver
       containers:
         - name: echoserver
           image: ealen/echo-server
