@@ -5,9 +5,33 @@ nodes:
   - role: worker
     labels:
       app: nginx
+    kubeadmConfigPatches:
+      - |
+        kind: JoinConfiguration
+        nodeRegistration:
+          taints:
+            - key: app
+              value: nginx
+              effect: NoSchedule
   - role: worker
     labels:
       app: httpbin
+    kubeadmConfigPatches:
+      - |
+        kind: JoinConfiguration
+        nodeRegistration:
+          taints:
+            - key: app
+              value: httpbin
+              effect: NoSchedule
   - role: worker
     labels:
       app: echoserver
+    kubeadmConfigPatches:
+      - |
+        kind: JoinConfiguration
+        nodeRegistration:
+          taints:
+            - key: app
+              value: echoserver
+              effect: NoSchedule

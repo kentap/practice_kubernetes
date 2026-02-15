@@ -16,6 +16,10 @@ spec:
     spec:
       nodeSelector:
         app: echoserver
+      tolerations:
+        - key: app
+          value: echoserver
+          effect: NoSchedule
       containers:
         - name: echoserver
           image: ealen/echo-server

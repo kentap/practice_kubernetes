@@ -16,6 +16,10 @@ spec:
     spec:
       nodeSelector:
         app: httpbin
+      tolerations:
+        - key: app
+          value: httpbin
+          effect: NoSchedule
       containers:
         - name: httpbin
           image: kennethreitz/httpbin
