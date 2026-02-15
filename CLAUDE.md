@@ -23,16 +23,16 @@ docs/
 
 | アプリ | イメージ | Namespace | ノード |
 |--------|---------|-----------|--------|
-| nginx | nginx:1.27 | nginx | app=nginx |
-| httpbin | kennethreitz/httpbin | httpbin | app=httpbin |
-| echoserver | ealen/echo-server | echoserver | app=echoserver |
+| nginx | nginx:1.27 | practice | app=nginx |
+| httpbin | kennethreitz/httpbin | practice | app=httpbin |
+| echoserver | ealen/echo-server | practice | app=echoserver |
 
 ## アーキテクチャ
 
 ### GitOps（App of Apps パターン）
 
 - `argocd/app-of-apps.yaml` が `apps/**/application.yaml` を検出し、子 Application を自動適用
-- 各アプリは独立した Namespace にデプロイ
+- 全アプリは `practice` Namespace に統一デプロイ（同一 Namespace 内でサービス名で分離、ArgoCD Application は個別管理）
 - syncPolicy: automated + prune + selfHeal + CreateNamespace=true
 
 ### ノード分離戦略
