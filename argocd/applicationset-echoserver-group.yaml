@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: echoserver-group
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/kentap/practice_kubernetes.git
+        revision: main
+        directories:
+          - path: apps/echoserver/manifests
+          - path: apps/httpbin/manifests
+  template:
+    metadata:
+      name: "{{ index .path.segments 1 }}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/kentap/practice_kubernetes.git
+        targetRevision: main
+        path: "{{ .path.path }}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: practice
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

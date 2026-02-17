@@ -8,10 +8,10 @@ ArgoCD + kind を使った Kubernetes 練習環境。本番 EKS を想定した�
 kind-config.yaml                  # kind クラスタ定義（worker ノード × 3）
 argocd/
   install/values.yaml             # ArgoCD Helm values
-  app-of-apps.yaml                # ルート Application（apps/ を再帰監視）
+  applicationset-echoserver-group.yaml  # echoserver + httpbin グループ
+  applicationset-nginx.yaml             # nginx グループ
 apps/
   <name>/
-    application.yaml              # ArgoCD Application 定義
     manifests/
       deployment.yaml             # Deployment（nodeSelector + tolerations）
       service.yaml                # Service
@@ -29,10 +29,11 @@ docs/
 
 ## アーキテクチャ
 
-### GitOps（App of Apps パターン）
+### GitOps（ApplicationSet パターン）
 
-- `argocd/app-of-apps.yaml` が `apps/**/application.yaml` を検出し、子 Application を自動適用
-- 全アプリは `practice` Namespace に統一デプロイ（同一 Namespace 内でサービス名で分離、ArgoCD Application は個別管理）
+- ApplicationSet の Git Directory Generator で `apps/*/manifests` を対象に Application を自動生成
+- sync 対象をグループ分離: `echoserver-group`（echoserver + httpbin）と `nginx` の2つの ApplicationSet
+- 全アプリは `practice` Namespace に統一デプロイ
 - syncPolicy: automated + prune + selfHeal + CreateNamespace=true
 
 ### ノード分離戦略
@@ -56,14 +57,15 @@ kind create cluster --name argocd-practice --config kind-config.yaml
 helm repo add argo https://argoproj.github.io/argo-helm
 helm install argocd argo/argo-cd -n argocd --create-namespace -f argocd/install/values.yaml
 
-# App of Apps 適用
-kubectl apply -f argocd/app-of-apps.yaml
+# ApplicationSet 適用
+kubectl apply -f argocd/applicationset-echoserver-group.yaml
+kubectl apply -f argocd/applicationset-nginx.yaml
 ```
 
 ### kind の制約
 
 - Taint やラベルの変更はクラスタ再作成が必要（`kind delete cluster` → `kind create cluster`）
-- 再作成後は ArgoCD の再インストール + App of Apps の再適用が必要
+- 再作成後は ArgoCD の再インストール + ApplicationSet の再適用が必要
 
 ## Git リポジトリ
 
@@ -74,6 +76,6 @@ kubectl apply -f argocd/app-of-apps.yaml
 ## アプリ追加手順
 
 1. `apps/<name>/manifests/` に deployment.yaml, service.yaml を作成
-2. `apps/<name>/application.yaml` を作成（既存アプリからコピー＋修正）
+2. 対象グループの ApplicationSet に `- path: apps/<name>/manifests` を追加
 3. `kind-config.yaml` に worker ノードを追加（labels + taints）
 4. クラスタを再作成して反映
