@@ -8,8 +8,8 @@ ArgoCD + kind を使った Kubernetes 練習環境。本番 EKS を想定した�
 kind-config.yaml                  # kind クラスタ定義（worker ノード × 3）
 argocd/
   install/values.yaml             # ArgoCD Helm values
-  applicationset-echoserver-group.yaml  # echoserver + httpbin グループ
-  applicationset-nginx.yaml             # nginx グループ
+  applicationset-echoserver-group.yaml  # echoserver + httpbin グループ（ApplicationSet）
+  application-nginx.yaml                # nginx（通常の Application）
 apps/
   <name>/
     manifests/
@@ -31,8 +31,8 @@ docs/
 
 ### GitOps（ApplicationSet パターン）
 
-- ApplicationSet の Git Directory Generator で `apps/*/manifests` を対象に Application を自動生成
-- sync 対象をグループ分離: `echoserver-group`（echoserver + httpbin）と `nginx` の2つの ApplicationSet
+- `echoserver-group` ApplicationSet: Git Directory Generator で echoserver + httpbin の Application を自動生成
+- `nginx` は通常の Application として個別管理（1アプリなので ApplicationSet 不要）
 - 全アプリは `practice` Namespace に統一デプロイ
 - syncPolicy: automated + prune + selfHeal + CreateNamespace=true
 
@@ -57,15 +57,15 @@ kind create cluster --name argocd-practice --config kind-config.yaml
 helm repo add argo https://argoproj.github.io/argo-helm
 helm install argocd argo/argo-cd -n argocd --create-namespace -f argocd/install/values.yaml
 
-# ApplicationSet 適用
+# ApplicationSet + Application 適用
 kubectl apply -f argocd/applicationset-echoserver-group.yaml
-kubectl apply -f argocd/applicationset-nginx.yaml
+kubectl apply -f argocd/application-nginx.yaml
 ```
 
 ### kind の制約
 
 - Taint やラベルの変更はクラスタ再作成が必要（`kind delete cluster` → `kind create cluster`）
-- 再作成後は ArgoCD の再インストール + ApplicationSet の再適用が必要
+- 再作成後は ArgoCD の再インストール + ApplicationSet / Application の再適用が必要
 
 ## Git リポジトリ
 

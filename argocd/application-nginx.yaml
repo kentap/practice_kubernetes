@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kentap/practice_kubernetes.git
+    targetRevision: main
+    path: apps/nginx/manifests
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: practice
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
